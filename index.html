@@ -81,11 +81,8 @@
     return arr;
   }
 
-  $("#f").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-
-    const payload = {
+  function buildPayload(fd) {
+    return {
       name: fd.get("name"),
       headline: fd.get("headline"),
       avatar: fd.get("avatar"),
@@ -100,6 +97,13 @@
       education: parseMultiJsonLines(fd.get("education")),
       projects: parseMultiJsonLines(fd.get("projects"))
     };
+  }
+
+  // Save form
+  $("#f").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const payload = buildPayload(fd);
 
     $("#msg").textContent = "Saving…";
     try {
@@ -114,6 +118,14 @@
     } catch (err) {
       $("#msg").textContent = "Error: " + err.message;
     }
+  });
+
+  // Preview button
+  $("#previewBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    const fd = new FormData($("#f"));
+    const payload = buildPayload(fd);
+    $("#previewOutput").textContent = JSON.stringify(payload, null, 2);
   });
 </script>
 </body>
