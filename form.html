@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Update your CV</title>
+  <link rel="stylesheet" href="form.css" />
+</head>
+<body>
+  <main>
+    <h1>Update your Digital CV</h1>
+    <p>This form will open a GitHub Issue with your inputs. Submitting that issue updates <code>profile.json</code> automatically.</p>
+
+    <form id="cvForm">
+      <label>Full Name <input name="name" required /></label>
+      <label>Headline <input name="headline" /></label>
+      <label>Avatar URL <input name="avatar" placeholder="https://..." /></label>
+      <label>Email <input name="email" /></label>
+      <label>Phone <input name="phone" /></label>
+      <label>Location <input name="location" /></label>
+
+      <label>Links (JSON)
+        <textarea name="links" placeholder='[{"label":"LinkedIn","href":"https://..."}]'></textarea>
+      </label>
+
+      <label>Core Competencies (one per line)
+        <textarea name="core_competencies" placeholder="Digital Transformation&#10;Agile & Scrum"></textarea>
+      </label>
+
+      <label>Technical Skills (one per line)
+        <textarea name="technical_skills" placeholder="Python&#10;AWS"></textarea>
+      </label>
+
+      <label>Languages (JSON)
+        <textarea name="languages" placeholder='[{"name":"English","level":"C1"}]'></textarea>
+      </label>
+
+      <label>Experience (JSON)
+        <textarea name="experience" placeholder='[{"title":"Manager","company":"Org","location":"City","start":"Jan 2024","end":"Present","highlights":["Did X","Did Y"]}]'></textarea>
+      </label>
+
+      <label>Education (JSON)
+        <textarea name="education" placeholder='[{"title":"Degree","institution":"School","year":"2024"}]'></textarea>
+      </label>
+
+      <label>Projects (JSON)
+        <textarea name="projects" placeholder='[{"name":"Project","description":"What it is","url":"https://..."}]'></textarea>
+      </label>
+
+      <button>Open GitHub Issue Form</button>
+    </form>
+  </main>
+
+  <script>
+    // CHANGE THIS to your repo owner/name:
+    const OWNER = "YOUR-USERNAME";
+    const REPO  = "cv-data-form";
+
+    document.getElementById("cvForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const payload = {
+        name: fd.get("name"),
+        headline: fd.get("headline"),
+        avatar: fd.get("avatar"),
+        email: fd.get("email"),
+        phone: fd.get("phone"),
+        location: fd.get("location"),
+        links: fd.get("links"),
+        core_competencies: fd.get("core_competencies"),
+        technical_skills: fd.get("technical_skills"),
+        languages: fd.get("languages"),
+        experience: fd.get("experience"),
+        education: fd.get("education"),
+        projects: fd.get("projects")
+      };
+
+      // Open the Issue Form (cv.yml) page with nothing prefilled except the title;
+      // You’ll paste the content there. If you prefer fully prefilled issues, switch to
+      // the older “issue template markdown” pattern where we can pass the body in URL.
+      const url = `https://github.com/${OWNER}/${REPO}/issues/new?template=cv.yml`;
+      window.open(url, "_blank");
+
+      // Also copy the JSON to clipboard to paste into the Issue fields quickly:
+      const nice = JSON.stringify(payload, null, 2);
+      navigator.clipboard.writeText(nice).then(()=>{
+        alert("We opened the GitHub Issue form in a new tab. Your data JSON is copied to clipboard — paste into the fields there and submit.");
+      });
+    });
+  </script>
+</body>
+</html>
