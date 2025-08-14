@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "name": { "type": "string" },
+    "headline": { "type": "string" },
+    "avatar": { "type": "string" },
+    "email": { "type": "string" },
+    "phone": { "type": "string" },
+    "location": { "type": "string" },
+    "links": { "type": "array", "items": { "type": "object", "properties": { "label": {"type":"string"}, "href": {"type":"string"} } } },
+    "core_competencies": { "type": "array", "items": { "type": "string" } },
+    "technical_skills": { "type": "array", "items": { "type": "string" } },
+    "languages": { "type": "array", "items": { "type": "object", "properties": { "name":{"type":"string"}, "level":{"type":"string"} } } },
+    "experience": { "type": "array" },
+    "education": { "type": "array" },
+    "projects": { "type": "array" }
+  }
+}
