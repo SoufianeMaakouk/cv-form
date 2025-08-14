@@ -1,132 +1,229 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CV Admin Form</title>
-  <link rel="stylesheet" href="form.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CV Admin Form</title>
+<link rel="stylesheet" href="form.css" />
+<style>
+  body { font-family: system-ui, sans-serif; padding: 1rem; }
+  section { border: 1px solid #ccc; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px; }
+  section h2 { margin-top: 0; }
+  label { display:block; margin-top: .5rem; }
+  input, textarea { width: 100%; padding: .4rem; }
+  .entry { border: 1px solid #ddd; padding: .5rem; margin: .5rem 0; border-radius: 6px; background: #f9f9f9; }
+  .btn { padding: .4rem .8rem; margin-top: .5rem; cursor: pointer; }
+  #previewOutput { background: #f6f8fa; padding: 1rem; border: 1px solid #ccc; border-radius: 8px; }
+</style>
 </head>
 <body>
-  <main>
-    <h1>Save / Update Profile</h1>
-    <p>Enter your data and press Save. The profile is stored in MongoDB via the API.</p>
 
-    <form id="f">
-      <label>Full Name* <input name="name" required placeholder="Soufiane Maakouk" /></label>
-      <label>Headline <input name="headline" placeholder="Manager Digital Technology" /></label>
-      <label>Avatar URL <input name="avatar" placeholder="https://..." /></label>
-      <label>Email <input name="email" /></label>
-      <label>Phone <input name="phone" /></label>
-      <label>Location <input name="location" /></label>
+<h1>CV Admin Form</h1>
+<form id="f">
 
-      <label>Links (JSON)
-        <textarea name="links" placeholder='[{"label":"LinkedIn","href":"https://..."}]'></textarea>
-      </label>
+<section>
+  <h2>Basic Info</h2>
+  <label>Full Name <input name="name" required></label>
+  <label>Headline <input name="headline"></label>
+  <label>Avatar URL <input name="avatar"></label>
+  <label>Email <input name="email"></label>
+  <label>Phone <input name="phone"></label>
+  <label>Location <input name="location"></label>
+</section>
 
-      <label>Core Competencies (one per line)
-        <textarea name="core_competencies" placeholder="Digital Transformation&#10;Agile & Scrum"></textarea>
-      </label>
+<section>
+  <h2>Links</h2>
+  <div id="links"></div>
+  <button type="button" class="btn" onclick="addLink()">+ Add Link</button>
+</section>
 
-      <label>Technical Skills (one per line)
-        <textarea name="technical_skills" placeholder="Python&#10;AWS"></textarea>
-      </label>
+<section>
+  <h2>Core Competencies</h2>
+  <div id="competencies"></div>
+  <button type="button" class="btn" onclick="addCompetency()">+ Add Competency</button>
+</section>
 
-      <label>Languages (JSON)
-        <textarea name="languages" placeholder='[{"name":"English","level":"C1"}]'></textarea>
-      </label>
+<section>
+  <h2>Technical Skills</h2>
+  <div id="skills"></div>
+  <button type="button" class="btn" onclick="addSkill()">+ Add Skill</button>
+</section>
 
-      <label>Experience (JSON)
-        <textarea name="experience" placeholder='[{"title":"Manager","company":"Org","location":"City","start":"Jan 2024","end":"Present","highlights":["Did X","Did Y"]}]'></textarea>
-      </label>
+<section>
+  <h2>Languages</h2>
+  <div id="languages"></div>
+  <button type="button" class="btn" onclick="addLanguage()">+ Add Language</button>
+</section>
 
-      <label>Education (JSON)
-        <textarea name="education" placeholder='[{"title":"Degree","institution":"School","year":"2024"}]'></textarea>
-      </label>
+<section>
+  <h2>Experience</h2>
+  <div id="experience"></div>
+  <button type="button" class="btn" onclick="addExperience()">+ Add Experience</button>
+</section>
 
-      <label>Projects (JSON)
-        <textarea name="projects" placeholder='[{"name":"Project","description":"What it is","url":"https://..."}]'></textarea>
-      </label>
+<section>
+  <h2>Education</h2>
+  <div id="education"></div>
+  <button type="button" class="btn" onclick="addEducation()">+ Add Education</button>
+</section>
 
-      <button type="submit">Save Profile</button>
-      <div id="msg"></div>
-    </form>
-  </main>
+<section>
+  <h2>Projects</h2>
+  <div id="projects"></div>
+  <button type="button" class="btn" onclick="addProject()">+ Add Project</button>
+</section>
 
-  <script>
-  // SET THIS to your API base:
-  const API_BASE = "https://cv-api-s596.onrender.com";
+<button type="submit" class="btn">Save Profile</button>
+<button id="previewBtn" class="btn">Preview JSON</button>
+<div id="msg"></div>
 
-  const $ = s => document.querySelector(s);
+</form>
 
-  function toLines(s) {
-    return (s || "").split("\n").map(x => x.trim()).filter(Boolean);
-  }
+<h2>Preview Output</h2>
+<pre id="previewOutput"></pre>
 
-  function parseMultiJsonLines(txt) {
-    if (!txt) return [];
-    const lines = txt.split("\n").map(l => l.trim()).filter(Boolean);
-    let arr = [];
-    for (const line of lines) {
-      try {
-        const obj = JSON.parse(line);
-        if (Array.isArray(obj)) {
-          arr = arr.concat(obj);
-        } else {
-          arr.push(obj);
-        }
-      } catch (e) {
-        console.warn("Invalid JSON line:", line);
-      }
+<script>
+const API_BASE = "https://cv-api-s596.onrender.com";
+
+function createInput(name, placeholder="") {
+  const i = document.createElement("input");
+  i.name = name;
+  i.placeholder = placeholder;
+  return i;
+}
+
+function createField(labelText, name) {
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  const input = createInput(name);
+  label.appendChild(input);
+  return label;
+}
+
+function addLink() {
+  const wrap = document.createElement("div");
+  wrap.className = "entry";
+  wrap.appendChild(createField("Label", "label"));
+  wrap.appendChild(createField("URL", "href"));
+  document.getElementById("links").appendChild(wrap);
+}
+
+function addCompetency() {
+  const input = createInput("competency");
+  document.getElementById("competencies").appendChild(input);
+}
+
+function addSkill() {
+  const input = createInput("skill");
+  document.getElementById("skills").appendChild(input);
+}
+
+function addLanguage() {
+  const wrap = document.createElement("div");
+  wrap.className = "entry";
+  wrap.appendChild(createField("Language", "name"));
+  wrap.appendChild(createField("Level", "level"));
+  document.getElementById("languages").appendChild(wrap);
+}
+
+function addExperience() {
+  const wrap = document.createElement("div");
+  wrap.className = "entry";
+  wrap.appendChild(createField("Title", "title"));
+  wrap.appendChild(createField("Company", "company"));
+  wrap.appendChild(createField("Location", "location"));
+  wrap.appendChild(createField("Start", "start"));
+  wrap.appendChild(createField("End", "end"));
+  const highlights = document.createElement("textarea");
+  highlights.name = "highlights";
+  highlights.placeholder = "One highlight per line";
+  wrap.appendChild(highlights);
+  document.getElementById("experience").appendChild(wrap);
+}
+
+function addEducation() {
+  const wrap = document.createElement("div");
+  wrap.className = "entry";
+  wrap.appendChild(createField("Title", "title"));
+  wrap.appendChild(createField("Institution", "institution"));
+  wrap.appendChild(createField("Year", "year"));
+  document.getElementById("education").appendChild(wrap);
+}
+
+function addProject() {
+  const wrap = document.createElement("div");
+  wrap.className = "entry";
+  wrap.appendChild(createField("Name", "name"));
+  wrap.appendChild(createField("Description", "description"));
+  wrap.appendChild(createField("URL", "url"));
+  document.getElementById("projects").appendChild(wrap);
+}
+
+function collectSection(sectionId, fields) {
+  const entries = [];
+  document.querySelectorAll(`#${sectionId} .entry`).forEach(entry => {
+    const obj = {};
+    fields.forEach(f => {
+      const el = entry.querySelector(`[name="${f}"]`);
+      if (el && el.value.trim()) obj[f] = el.value.trim();
+    });
+    if (obj.highlights) {
+      obj.highlights = obj.highlights.split("\n").map(x => x.trim()).filter(Boolean);
     }
-    return arr;
-  }
-
-  function buildPayload(fd) {
-    return {
-      name: fd.get("name"),
-      headline: fd.get("headline"),
-      avatar: fd.get("avatar"),
-      email: fd.get("email"),
-      phone: fd.get("phone"),
-      location: fd.get("location"),
-      links: parseMultiJsonLines(fd.get("links")),
-      core_competencies: toLines(fd.get("core_competencies")),
-      technical_skills: parseMultiJsonLines(fd.get("technical_skills")),
-      languages: parseMultiJsonLines(fd.get("languages")),
-      experience: parseMultiJsonLines(fd.get("experience")),
-      education: parseMultiJsonLines(fd.get("education")),
-      projects: parseMultiJsonLines(fd.get("projects"))
-    };
-  }
-
-  // Save form
-  $("#f").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const fd = new FormData(e.target);
-    const payload = buildPayload(fd);
-
-    $("#msg").textContent = "Saving…";
-    try {
-      const res = await fetch(`${API_BASE}/profiles`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save");
-      $("#msg").innerHTML = `Saved ✅ — <a href="https://thebeastmaak.github.io/cv-page/?name=${encodeURIComponent(payload.name)}" target="_blank">View profile</a>`;
-    } catch (err) {
-      $("#msg").textContent = "Error: " + err.message;
-    }
+    if (Object.keys(obj).length) entries.push(obj);
   });
+  return entries;
+}
 
-  // Preview button
-  $("#previewBtn").addEventListener("click", (e) => {
-    e.preventDefault();
-    const fd = new FormData($("#f"));
-    const payload = buildPayload(fd);
-    $("#previewOutput").textContent = JSON.stringify(payload, null, 2);
-  });
+function collectList(sectionId, fieldName) {
+  return Array.from(document.querySelectorAll(`#${sectionId} [name="${fieldName}"]`))
+    .map(el => el.value.trim())
+    .filter(Boolean);
+}
+
+function buildPayload() {
+  return {
+    name: document.querySelector("[name='name']").value,
+    headline: document.querySelector("[name='headline']").value,
+    avatar: document.querySelector("[name='avatar']").value,
+    email: document.querySelector("[name='email']").value,
+    phone: document.querySelector("[name='phone']").value,
+    location: document.querySelector("[name='location']").value,
+    links: collectSection("links", ["label", "href"]),
+    core_competencies: collectList("competencies", "competency"),
+    technical_skills: collectList("skills", "skill"),
+    languages: collectSection("languages", ["name", "level"]),
+    experience: collectSection("experience", ["title", "company", "location", "start", "end", "highlights"]),
+    education: collectSection("education", ["title", "institution", "year"]),
+    projects: collectSection("projects", ["name", "description", "url"])
+  };
+}
+
+document.getElementById("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const payload = buildPayload();
+  document.getElementById("msg").textContent = "Saving…";
+  try {
+    const res = await fetch(`${API_BASE}/profiles`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Failed to save");
+    document.getElementById("msg").innerHTML =
+      `Saved ✅ — <a href="https://thebeastmaak.github.io/cv-page/?name=${encodeURIComponent(payload.name)}" target="_blank">View profile</a>`;
+  } catch (err) {
+    document.getElementById("msg").textContent = "Error: " + err.message;
+  }
+});
+
+document.getElementById("previewBtn").addEventListener("click", e => {
+  e.preventDefault();
+  const payload = buildPayload();
+  document.getElementById("previewOutput").textContent = JSON.stringify(payload, null, 2);
+});
 </script>
+
 </body>
 </html>
