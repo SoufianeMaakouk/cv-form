@@ -81,11 +81,6 @@
     return arr;
   }
 
-  function tryJson(str, fallback) {
-    try { return JSON.parse(str || JSON.stringify(fallback)); }
-    catch { return fallback; }
-  }
-
   $("#f").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
