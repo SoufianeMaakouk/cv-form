@@ -53,47 +53,73 @@
   </main>
 
   <script>
-    // SET THIS to your API base:
-    const API_BASE = "https://cv-api-s596.onrender.com";
+  // SET THIS to your API base:
+  const API_BASE = "https://cv-api-s596.onrender.com";
 
-    const $ = s => document.querySelector(s);
-    $("#f").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
+  const $ = s => document.querySelector(s);
 
-      const toLines = (s) => (s||"").split("\n").map(x=>x.trim()).filter(Boolean);
-      const tryJson = (s, fallback) => { try { return JSON.parse(s || JSON.stringify(fallback)); } catch { return fallback; } };
+  function toLines(s) {
+    return (s || "").split("\n").map(x => x.trim()).filter(Boolean);
+  }
 
-      const payload = {
-        name: fd.get("name"),
-        headline: fd.get("headline"),
-        avatar: fd.get("avatar"),
-        email: fd.get("email"),
-        phone: fd.get("phone"),
-        location: fd.get("location"),
-        links: tryJson(fd.get("links"), []),
-        core_competencies: toLines(fd.get("core_competencies")),
-        technical_skills: toLines(fd.get("technical_skills")),
-        languages: tryJson(fd.get("languages"), []),
-        experience: tryJson(fd.get("experience"), []),
-        education: tryJson(fd.get("education"), []),
-        projects: tryJson(fd.get("projects"), [])
-      };
-
-      $("#msg").textContent = "Saving…";
+  function parseMultiJsonLines(txt) {
+    if (!txt) return [];
+    const lines = txt.split("\n").map(l => l.trim()).filter(Boolean);
+    let arr = [];
+    for (const line of lines) {
       try {
-        const res = await fetch(`${API_BASE}/profiles`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to save");
-        $("#msg").textContent = `Saved ✅ — View: https://YOUR-USERNAME.github.io/cv-page/?name=${encodeURIComponent(payload.name)}`;
-      } catch (err) {
-        $("#msg").textContent = "Error: " + err.message;
+        const obj = JSON.parse(line);
+        if (Array.isArray(obj)) {
+          arr = arr.concat(obj);
+        } else {
+          arr.push(obj);
+        }
+      } catch (e) {
+        console.warn("Invalid JSON line:", line);
       }
-    });
-  </script>
+    }
+    return arr;
+  }
+
+  function tryJson(str, fallback) {
+    try { return JSON.parse(str || JSON.stringify(fallback)); }
+    catch { return fallback; }
+  }
+
+  $("#f").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+
+    const payload = {
+      name: fd.get("name"),
+      headline: fd.get("headline"),
+      avatar: fd.get("avatar"),
+      email: fd.get("email"),
+      phone: fd.get("phone"),
+      location: fd.get("location"),
+      links: parseMultiJsonLines(fd.get("links")),
+      core_competencies: toLines(fd.get("core_competencies")),
+      technical_skills: parseMultiJsonLines(fd.get("technical_skills")),
+      languages: parseMultiJsonLines(fd.get("languages")),
+      experience: parseMultiJsonLines(fd.get("experience")),
+      education: parseMultiJsonLines(fd.get("education")),
+      projects: parseMultiJsonLines(fd.get("projects"))
+    };
+
+    $("#msg").textContent = "Saving…";
+    try {
+      const res = await fetch(`${API_BASE}/profiles`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save");
+      $("#msg").innerHTML = `Saved ✅ — <a href="https://thebeastmaak.github.io/cv-page/?name=${encodeURIComponent(payload.name)}" target="_blank">View profile</a>`;
+    } catch (err) {
+      $("#msg").textContent = "Error: " + err.message;
+    }
+  });
+</script>
 </body>
 </html>
