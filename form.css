@@ -1,6 +1,7 @@
 body { font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; padding: 1.5rem; color:#0e1116; }
-main { max-width: 850px; margin: 0 auto; }
+main { max-width: 900px; margin: 0 auto; }
 label { display:block; margin:.75rem 0; }
 input, textarea, button { width:100%; padding:.6rem; border:1px solid #d0d7de; border-radius:8px; }
 textarea { min-height:120px; }
 button { cursor:pointer; }
+#msg { margin-top: .75rem; }
