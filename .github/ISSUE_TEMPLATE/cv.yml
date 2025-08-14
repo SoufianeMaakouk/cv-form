@@ -1,0 +1,62 @@
+name: "Update CV"
+description: "Submit changes to your Digital CV data."
+title: "CV update: {{ date | date('YYYY-MM-DD') }}"
+labels: ["cv-update"]
+body:
+  - type: input
+    id: name
+    attributes: { label: "Full Name", placeholder: "Your Name" }
+    validations: { required: true }
+  - type: input
+    id: headline
+    attributes: { label: "Headline", placeholder: "e.g., Manager Digital Technology" }
+  - type: input
+    id: avatar
+    attributes: { label: "Avatar URL", placeholder: "https://..." }
+  - type: input
+    id: email
+    attributes: { label: "Email" }
+  - type: input
+    id: phone
+    attributes: { label: "Phone" }
+  - type: input
+    id: location
+    attributes: { label: "Location" }
+  - type: textarea
+    id: links
+    attributes:
+      label: "Links (JSON array)"
+      description: 'Example: [{"label":"LinkedIn","href":"https://..."}]'
+      placeholder: '[]'
+  - type: textarea
+    id: core_competencies
+    attributes:
+      label: "Core Competencies (one per line)"
+      placeholder: "Digital Transformation\nAgile & Scrum\n..."
+  - type: textarea
+    id: technical_skills
+    attributes:
+      label: "Technical Skills (one per line)"
+      placeholder: "Python\nAWS\n..."
+  - type: textarea
+    id: languages
+    attributes:
+      label: "Languages (JSON array)"
+      description: 'Example: [{"name":"English","level":"C1"}]'
+      placeholder: '[]'
+  - type: textarea
+    id: experience
+    attributes:
+      label: "Experience (JSON array)"
+      description: 'Use an array of objects. Example in the README.'
+      placeholder: '[]'
+  - type: textarea
+    id: education
+    attributes:
+      label: "Education (JSON array)"
+      placeholder: '[]'
+  - type: textarea
+    id: projects
+    attributes:
+      label: "Projects (JSON array)"
+      placeholder: '[]'
