@@ -212,7 +212,7 @@ document.getElementById("f").addEventListener("submit", async e => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Failed to save");
     document.getElementById("msg").innerHTML =
-      `Saved ✅ — <a href="https://thebeastmaak.github.io/cv-page/?name=${encodeURIComponent(payload.name)}" target="_blank">View profile</a>`;
+      `Saved ✅ — <a href="https://soufianemaakouk.github.io/cv-page/?name=${encodeURIComponent(payload.name)}" target="_blank">View profile</a>`;
   } catch (err) {
     document.getElementById("msg").textContent = "Error: " + err.message;
   }
